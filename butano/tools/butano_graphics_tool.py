@@ -1,5 +1,5 @@
 """
-Copyright (c) 2020-2023 Gustavo Valiente gustavo.valiente@protonmail.com
+Copyright (c) 2020-2025 Gustavo Valiente gustavo.valiente@protonmail.com
 zlib License, see LICENSE file.
 """
 
@@ -9,10 +9,10 @@ import re
 import string
 import subprocess
 import sys
-from multiprocessing import Pool
 
 from bmp import BMP
 from file_info import FileInfo
+from pool import create_pool
 
 
 def parse_colors_count(info, bmp, tag='colors_count'):
@@ -620,6 +620,9 @@ class RegularBgItem:
             if self.__big:
                 if width == 256 and height == 256:
                     raise ValueError('Too small size for a big regular BG: ' + str(width) + ' - ' + str(height))
+
+                if width > 16384 or height > 16384:
+                    raise ValueError('Too big size for a big regular BG: ' + str(width) + ' - ' + str(height))
             else:
                 if big_dimensions:
                     raise ValueError('Too big size for a not big regular BG: ' + str(width) + ' - ' + str(height))
@@ -1134,6 +1137,9 @@ class AffineBgItem:
             if self.__big:
                 if width <= 256 and height <= 256:
                     raise ValueError('Too small size for a big affine BG: ' + str(width) + ' - ' + str(height))
+
+                if width > 16384 or height > 16384:
+                    raise ValueError('Too big size for a big affine BG: ' + str(width) + ' - ' + str(height))
             else:
                 if big_dimensions:
                     raise ValueError('Too big size for a not big affine BG: ' + str(width) + ' - ' + str(height))
@@ -1764,7 +1770,7 @@ def process_graphics(grit, graphics_paths, build_folder_path):
 
         sys.stdout.flush()
 
-        pool = Pool()
+        pool = create_pool()
         process_results = pool.map(GraphicsFileInfoProcessor(grit, build_folder_path), graphics_file_infos)
         pool.close()
 

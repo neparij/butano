@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Gustavo Valiente gustavo.valiente@protonmail.com
+ * Copyright (c) 2020-2025 Gustavo Valiente gustavo.valiente@protonmail.com
  * zlib License, see LICENSE file.
  */
 
@@ -136,14 +136,9 @@ namespace
                 return _list->_items[_index];
             }
 
-            [[nodiscard]] friend bool operator==(const iterator& a, const iterator& b)
-            {
-                return a._index == b._index;
-            }
-
             [[nodiscard]] friend bool operator!=(const iterator& a, const iterator& b)
             {
-                return ! (a == b);
+                return a._index != b._index;
             }
 
         private:
@@ -170,7 +165,7 @@ namespace
 
         [[nodiscard]] int size() const
         {
-            return _free_indices_size;
+            return max_items - _free_indices_size;
         }
 
         [[nodiscard]] int available() const
@@ -275,6 +270,61 @@ namespace
     BN_DATA_EWRAM_BSS static_data data;
 
 
+    #if BN_CFG_SPRITE_TILES_SANITY_CHECK_ENABLED
+        void _sanity_check()
+        {
+            int items_count = 0;
+            int free_tiles_count = 0;
+            int used_tiles_count = 0;
+            int to_remove_tiles_count = 0;
+            int next_start_tile = 0;
+
+            for(const item_type& item : data.items)
+            {
+                BN_ASSERT(item.start_tile == next_start_tile, item.start_tile, " - ", next_start_tile);
+                next_start_tile = item.start_tile + item.tiles_count;
+                ++items_count;
+
+                switch(item.status())
+                {
+
+                case status_type::FREE:
+                    free_tiles_count += item.tiles_count;
+                    break;
+
+                case status_type::USED:
+                    used_tiles_count += item.tiles_count;
+                    break;
+
+                case status_type::TO_REMOVE:
+                    to_remove_tiles_count += item.tiles_count;
+                    break;
+
+                default:
+                    BN_ERROR("Invalid item status: ", int(item.status()));
+                    break;
+                }
+            }
+
+            BN_ASSERT(items_count == data.items.size(), items_count, " - ", data.items.size());
+            BN_ASSERT(free_tiles_count == data.free_tiles_count, free_tiles_count, " - ", data.free_tiles_count);
+            BN_ASSERT(to_remove_tiles_count == data.to_remove_tiles_count,
+                      to_remove_tiles_count, " - ", data.to_remove_tiles_count);
+            BN_ASSERT(free_tiles_count + used_tiles_count + to_remove_tiles_count == hw::sprite_tiles::tiles_count(),
+                      free_tiles_count, " - ", used_tiles_count, " - ", to_remove_tiles_count, " - ",
+                      hw::sprite_tiles::tiles_count());
+        }
+
+        #define BN_SPRITE_TILES_SANITY_CHECK \
+            _sanity_check
+    #else
+        #define BN_SPRITE_TILES_SANITY_CHECK(...) \
+            do \
+            { \
+            } while(false)
+    #endif
+
+
     #if BN_CFG_SPRITE_TILES_LOG_ENABLED
         void _log_status()
         {
@@ -346,17 +396,16 @@ namespace
         #define BN_SPRITE_TILES_LOG BN_LOG
 
         #define BN_SPRITE_TILES_LOG_STATUS \
-            _log_status
+            _log_status(); \
+            BN_SPRITE_TILES_SANITY_CHECK
     #else
         #define BN_SPRITE_TILES_LOG(...) \
             do \
             { \
             } while(false)
 
-        #define BN_SPRITE_TILES_LOG_STATUS(...) \
-            do \
-            { \
-            } while(false)
+        #define BN_SPRITE_TILES_LOG_STATUS \
+            BN_SPRITE_TILES_SANITY_CHECK
     #endif
 
 
@@ -443,6 +492,16 @@ namespace
                         data.to_commit_uncompressed_items : data.to_commit_compressed_items;
             to_commit_items.erase(bn::find(to_commit_items.begin(), to_commit_items.end(), id));
         }
+    }
+
+    __attribute__((noinline)) void _insert_items_map_item(const tile* item_data, int index)
+    {
+        data.items_map.insert(item_data, index);
+    }
+
+    __attribute__((noinline)) void _erase_items_map_item(const tile* item_data)
+    {
+        data.items_map.erase(item_data);
     }
 
     [[nodiscard]] int _find_impl(const tile* tiles_data, [[maybe_unused]] compression_type compression,
@@ -550,7 +609,7 @@ namespace
 
         case status_type::TO_REMOVE:
             item.commit_if_recovered = false;
-            data.items_map.erase(item.data);
+            _erase_items_map_item(item.data);
             data.to_remove_tiles_count -= tiles_count;
             break;
 
@@ -787,7 +846,7 @@ int create(const span<const tile>& tiles_ref, compression_type compression)
 
     if(result >= 0)
     {
-        data.items_map.insert(tiles_data, result);
+        _insert_items_map_item(tiles_data, result);
 
         BN_SPRITE_TILES_LOG("CREATED. start_tile: ", data.items.item(result).start_tile);
         BN_SPRITE_TILES_LOG_STATUS();
@@ -859,7 +918,7 @@ int create_optional(const span<const tile>& tiles_ref, compression_type compress
 
     if(result >= 0)
     {
-        data.items_map.insert(tiles_data, result);
+        _insert_items_map_item(tiles_data, result);
 
         BN_SPRITE_TILES_LOG("CREATED. start_tile: ", data.items.item(result).start_tile);
         BN_SPRITE_TILES_LOG_STATUS();
@@ -973,8 +1032,8 @@ void set_tiles_ref(int id, const span<const tile>& tiles_ref, compression_type c
         BN_BASIC_ASSERT(data.items_map.find(new_tiles_data) == data.items_map.end(),
                         "Multiple copies of the same tiles data not supported");
 
-        data.items_map.erase(old_tiles_data);
-        data.items_map.insert(new_tiles_data, id);
+        _erase_items_map_item(old_tiles_data);
+        _insert_items_map_item(new_tiles_data, id);
 
         if(compression != item_compression)
         {
@@ -1047,7 +1106,7 @@ void update()
 
             if(item.data)
             {
-                data.items_map.erase(item.data);
+                _erase_items_map_item(item.data);
                 item.data = nullptr;
             }
 

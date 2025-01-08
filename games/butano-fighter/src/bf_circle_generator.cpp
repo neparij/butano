@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Gustavo Valiente gustavo.valiente@protonmail.com
+ * Copyright (c) 2020-2025 Gustavo Valiente gustavo.valiente@protonmail.com
  * zlib License, see LICENSE file.
  */
 
@@ -20,7 +20,7 @@ void circle_generator::set_radius(bn::fixed radius)
 
 void circle_generator::generate(bn::span<bn::pair<bn::fixed, bn::fixed>> values) const
 {
-    // https://www.coranac.com/tonc/text/dma.htm#sec-demo
+    // https://gbadev.net/tonc/dma.html#sec-demo
 
     int values_count = values.size();
 

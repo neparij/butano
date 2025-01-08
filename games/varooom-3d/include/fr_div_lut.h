@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Gustavo Valiente gustavo.valiente@protonmail.com
+ * Copyright (c) 2020-2025 Gustavo Valiente gustavo.valiente@protonmail.com
  * zlib License, see LICENSE file.
  */
 
@@ -7,7 +7,6 @@
 #define FR_DIV_LUT_H
 
 #include "bn_fixed.h"
-#include "bn_type_traits.h"
 
 namespace fr
 {
@@ -30,8 +29,16 @@ template<int Precision>
 {
     static_assert(Precision > 0 && Precision <= div_lut_precision, "Invalid precision");
 
-    uint32_t div_lut_value = bn::is_constant_evaluated() ?
-                calculate_div_lut_value(denominator) : div_lut_ptr[denominator];
+    uint32_t div_lut_value = 0;
+
+    if consteval
+    {
+        div_lut_value = calculate_div_lut_value(denominator);
+    }
+    else
+    {
+        div_lut_value = div_lut_ptr[denominator];
+    }
 
     return bn::fixed_t<Precision>::from_data(numerator * int(div_lut_value >> (div_lut_precision - Precision)));
 }

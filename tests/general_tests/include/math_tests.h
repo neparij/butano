@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Gustavo Valiente gustavo.valiente@protonmail.com
+ * Copyright (c) 2020-2025 Gustavo Valiente gustavo.valiente@protonmail.com
  * zlib License, see LICENSE file.
  */
 
@@ -117,6 +117,20 @@ public:
                 auto std_atan2 = int(std::atan2(float(y), float(x)) * float(32768 / 3.14159));
                 BN_ASSERT(bn::abs(bn_atan2 - std_atan2) < 3);
                 BN_ASSERT(bn::abs(std_atan2 - diamond_angle) < 744);
+            }
+        }
+
+        bn::fixed safe_angle = 0;
+
+        for(int angle = -720; angle < 720; ++angle)
+        {
+            BN_ASSERT(bn::safe_degrees_angle(angle) == safe_angle, bn::safe_degrees_angle(angle), " - ", safe_angle);
+
+            safe_angle += 1;
+
+            if(safe_angle == 360)
+            {
+                safe_angle = 0;
             }
         }
     }

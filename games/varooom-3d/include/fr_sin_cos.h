@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Gustavo Valiente gustavo.valiente@protonmail.com
+ * Copyright (c) 2020-2025 Gustavo Valiente gustavo.valiente@protonmail.com
  * zlib License, see LICENSE file.
  */
 
@@ -8,7 +8,6 @@
 
 #include "bn_fixed.h"
 #include "bn_sin_lut.h"
-#include "bn_type_traits.h"
 
 namespace fr
 {
@@ -17,7 +16,7 @@ extern const int16_t* sin_lut_ptr;
 
 [[nodiscard]] constexpr bn::fixed sin(int angle)
 {
-    if(bn::is_constant_evaluated())
+    if consteval
     {
         return bn::fixed::from_data(bn::calculate_sin_lut_value(angle));
     }

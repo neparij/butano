@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Gustavo Valiente gustavo.valiente@protonmail.com
+ * Copyright (c) 2020-2025 Gustavo Valiente gustavo.valiente@protonmail.com
  * zlib License, see LICENSE file.
  */
 
@@ -51,6 +51,8 @@ int main()
 
     bn::string_view info_text_lines[7];
     info_text_lines[2] = "Logs window is located in";
+    info_text_lines[5] = "The current log backend";
+    info_text_lines[6] = "is defined by BN_CFG_LOG_BACKEND";
 
     #if BN_CFG_LOG_BACKEND == BN_LOG_BACKEND_VBA
         info_text_lines[0] = "VisualBoyAdvance backend";

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Gustavo Valiente gustavo.valiente@protonmail.com
+ * Copyright (c) 2020-2025 Gustavo Valiente gustavo.valiente@protonmail.com
  * zlib License, see LICENSE file.
  */
 
@@ -152,7 +152,7 @@ void update()
 
 void set_interrupt(const span<const key_type>& keys)
 {
-    BN_ASSERT(! keys.empty(), "There's no keys");
+    BN_BASIC_ASSERT(! keys.empty(), "There are no keys");
 
     hw::keypad::set_interrupt(keys);
 }

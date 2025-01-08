@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Gustavo Valiente gustavo.valiente@protonmail.com
+ * Copyright (c) 2020-2025 Gustavo Valiente gustavo.valiente@protonmail.com
  * zlib License, see LICENSE file.
  */
 
@@ -70,7 +70,7 @@ namespace
         "",
         "GBA hardware access and more",
         "Tonclib",
-        "coranac.com/projects/#tonc",
+        "coranac.com/man/tonclib",
         "",
         "Universal GBA Library",
         "github.com/AntonioND/ugba",

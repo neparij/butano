@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Gustavo Valiente gustavo.valiente@protonmail.com
+ * Copyright (c) 2020-2025 Gustavo Valiente gustavo.valiente@protonmail.com
  * zlib License, see LICENSE file.
  */
 
@@ -18,6 +18,7 @@
 #include "bn_utility.h"
 #include "bn_iterator.h"
 #include "bn_algorithm.h"
+#include "bn_type_traits.h"
 #include "bn_vector_fwd.h"
 
 namespace bn
@@ -744,17 +745,6 @@ public:
         }
 
         return equal(a_data, a_data + a_size, b_data);
-    }
-
-    /**
-     * @brief Not equal operator.
-     * @param a First ivector to compare.
-     * @param b Second ivector to compare.
-     * @return `true` if the first ivector is not equal to the second one, otherwise `false`.
-     */
-    [[nodiscard]] friend bool operator!=(const ivector& a, const ivector& b)
-    {
-        return ! (a == b);
     }
 
     /**

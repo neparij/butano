@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Gustavo Valiente gustavo.valiente@protonmail.com
+ * Copyright (c) 2020-2025 Gustavo Valiente gustavo.valiente@protonmail.com
  * zlib License, see LICENSE file.
  */
 
@@ -31,6 +31,7 @@
 #include "../hw/include/bn_hw_irq.h"
 #include "../hw/include/bn_hw_link.h"
 #include "../hw/include/bn_hw_core.h"
+#include "../hw/include/bn_hw_gpio.h"
 #include "../hw/include/bn_hw_sram.h"
 #include "../hw/include/bn_hw_timer.h"
 #include "../hw/include/bn_hw_memory.h"
@@ -170,6 +171,7 @@ namespace
 
         //audio_manager::stop();
         hdma_manager::force_stop();
+        hblank_effects_manager::stop();
         palettes_manager::stop();
         bgs_manager::stop();
         display_manager::stop();
@@ -237,6 +239,10 @@ namespace
         BN_BARRIER;
         result.missed_frames = data.missed_frames;
         data.missed_frames = 0;
+
+        BN_PROFILER_ENGINE_DETAILED_START("eng_hblank_fx_commit");
+        hblank_effects_manager::disable();
+        BN_PROFILER_ENGINE_DETAILED_STOP();
 
         //BN_PROFILER_ENGINE_DETAILED_START("eng_audio_commands");
         //audio_manager::execute_commands();
@@ -358,7 +364,10 @@ void init(const optional<color>& transparent_color, const string_view& keypad_co
     data.slow_game_pak = hw::game_pak::init();
     hw::memory::init();
 
-    [[maybe_unused]] const char* sram_type = hw::sram::init();
+    [[maybe_unused]] const char* sram_string = hw::sram::init();
+
+    // Init gpio:
+    [[maybe_unused]] const char* rtc_string = hw::gpio::init();
 
     // Init display:
     display_manager::init();
@@ -469,7 +478,7 @@ void sleep(keypad::key_type wake_up_key)
 
 void sleep(const span<const keypad::key_type>& wake_up_keys)
 {
-    BN_ASSERT(! wake_up_keys.empty(), "There's no wake up keys");
+    BN_BASIC_ASSERT(! wake_up_keys.empty(), "There are no keys");
 
     // Force at least one update:
     update();

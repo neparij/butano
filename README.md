@@ -115,6 +115,15 @@ of the infamous Mega Drive game!
 
 ![](docs_tools/images/doadx_title.png) ![](docs_tools/images/doadx_gameplay.png)
 
+* [BeatBeast](https://afska.itch.io/beat-beast): help Joaquín shoot his way out of this rhythmic world!
+
+![](docs_tools/images/beat_beast_title.png) ![](docs_tools/images/beat_beast_gameplay.png)
+
+* [Discrete Orange](https://tardigrade-nx.itch.io/discrete-orange): a turn-based puzzle-platformer 
+with discrete movement. 
+
+![](docs_tools/images/discrete_orange_title.png) ![](docs_tools/images/discrete_orange_gameplay.png)
+
 * [Feline](https://foopod.itch.io/feline): explore the world as a cat, meet new people, learn new languages, 
 face difficult foes and save your family!
 
@@ -141,6 +150,15 @@ NASA and even the FBI!
 
 ![](docs_tools/images/lro_title.png) ![](docs_tools/images/lro_gameplay.png)
 
+* [Sleep Paradox](https://staticlinkage.itch.io/sleep-paradox): as student Fredericko you'll explore the school,
+leveling up as you fight through the hordes, searching for some kind of answer to what is going on.
+
+![](docs_tools/images/sleep_paradox_title.png) ![](docs_tools/images/sleep_paradox_gameplay.png)
+
+* [GBA pseudo-3D demo](https://github.com/chrislewisdev/gba-pseudo-3d): Sonic Battle's pseudo-3D rendering demo.
+
+![](docs_tools/images/gba_pseudo_3d_demo_gameplay.png)
+
 * [Bridge Quest](https://fixxiefixx.itch.io/bridge-quest): find the way to the desert, but beware, 
 because enemies and an evil tree boss will try to stop you!
 
@@ -150,6 +168,19 @@ because enemies and an evil tree boss will try to stop you!
 small demo/prototype of a visual novel about joining an ordinary math club.
 
 ![](docs_tools/images/advance_amlc_title.png) ![](docs_tools/images/advance_amlc_gameplay.png)
+
+* [Toll Runner](https://jenkalab.itch.io/toll-runner): complete 17 levels to find out why the mouse had to run!
+
+![](docs_tools/images/toll_runner_title.png) ![](docs_tools/images/toll_runner_gameplay.png)
+
+* [Happy Dawn](https://luife.itch.io/happy-dawn): a hilarious story unfolds about a day in the life of Carlitos,
+a boy who wakes up on a new, happy day to go to school.
+
+![](docs_tools/images/happy_dawn_gameplay.png)
+
+* [Space Evangelion](https://fixxiefixx.itch.io/space-evangelion): you play as an angel fighting evil beeings in space.
+
+![](docs_tools/images/space_evangelion_title.png) ![](docs_tools/images/space_evangelion_gameplay.png)
 
 * [Knight Owls](https://blaise-rascal.itch.io/knight-owls): build up a powerful spellbook and take on many enemies, 
 gather owls and upgrades while managing your health and money and defeat the final boss to win!
@@ -161,14 +192,37 @@ your flock of sheep!
 
 ![](docs_tools/images/collie_defence_title.png) ![](docs_tools/images/collie_defence_gameplay.png)
 
+* [Detective Monroe: Murder at Sea](https://eragnarok.itch.io/detective-monroe-murder-at-sea): play as
+Detective Alex Monroe in his new adventure where he solves a murder mystery, while on vacation on a cruise ship!
+
+![](docs_tools/images/detective_monroe_title.png) ![](docs_tools/images/detective_monroe_gameplay.png)
+
 * [Sips](https://foopod.itch.io/sips): enjoy watching people while you earn money to upgrade your cafe.
 
 ![](docs_tools/images/sips_gameplay.png)
+
+* [Work Life](https://jeffzzq.itch.io/work-life): visual novel focusing on relationships in a modern workplace.
+
+![](docs_tools/images/work_life_title.png) ![](docs_tools/images/work_life_gameplay.png)
+
+* [Bata Dubnos](https://fralacticus.itch.io/bata-dubnos): shoot the possessed portrait faces and ???
+
+![](docs_tools/images/bata_dubnos_title.png) ![](docs_tools/images/bata_dubnos_gameplay.png)
+
+* [Sys*Crusher](https://drkylstein.itch.io/syscrusher): take on contracts to steal files, crash systems
+and commit industrial sabotage!
+
+![](docs_tools/images/sys_crusher_title.png) ![](docs_tools/images/sys_crusher_gameplay.png)
 
 * [Nuclear Love](https://foopod.itch.io/nuclear-love): have fun getting to know other survivors in this dating-show, 
 who knows, maybe you might find your future Mr. or Mrs Right?
 
 ![](docs_tools/images/nuclear_love_title.png) ![](docs_tools/images/nuclear_love_gameplay.png)
+
+* [Globlins!](https://jeremyelkayam.itch.io/globlins): early prototype for a single player action platformer
+with RPG elements and multiple endings.
+
+![](docs_tools/images/goblins_title.png) ![](docs_tools/images/goblins_gameplay.png)
 
 * [Tremblay Island](https://cinemint.itch.io/tremblay-island): take on the role of any island villager and 
 interact with the others, taking part in the drama while eventually trying to keep a grouchy alligator 

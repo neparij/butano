@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Gustavo Valiente gustavo.valiente@protonmail.com
+ * Copyright (c) 2020-2025 Gustavo Valiente gustavo.valiente@protonmail.com
  * zlib License, see LICENSE file.
  */
 
@@ -429,6 +429,22 @@ void set_blending_intensity_alpha(fixed intensity_alpha)
             data.blending_transparency_top_weight != -1 ||
             data.blending_transparency_bottom_weight != -1)
     {
+        data.blending_intensity_alpha = intensity_alpha;
+        data.blending_transparency_top_weight = -1;
+        data.blending_transparency_bottom_weight = -1;
+        data.update_blending_transparency = true;
+        data.commit = true;
+    }
+}
+
+void set_blending_transparency_and_intensity_alpha(fixed transparency_alpha, fixed intensity_alpha)
+{
+    if(data.blending_transparency_alpha != transparency_alpha ||
+            data.blending_intensity_alpha != intensity_alpha ||
+            data.blending_transparency_top_weight != -1 ||
+            data.blending_transparency_bottom_weight != -1)
+    {
+        data.blending_transparency_alpha = transparency_alpha;
         data.blending_intensity_alpha = intensity_alpha;
         data.blending_transparency_top_weight = -1;
         data.blending_transparency_bottom_weight = -1;

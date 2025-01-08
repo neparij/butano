@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Gustavo Valiente gustavo.valiente@protonmail.com
+ * Copyright (c) 2020-2025 Gustavo Valiente gustavo.valiente@protonmail.com
  * zlib License, see LICENSE file.
  */
 
@@ -59,10 +59,13 @@ public:
         using hasher = iunordered_map::hasher; //!< Hash functor alias.
         using key_equal = iunordered_map::key_equal; //!< Equality functor alias.
         using reference = iunordered_map::reference; //!< (Key, Value) pair reference alias.
-        using const_reference = iunordered_map::const_reference; //!< (Key, Value) pair const reference alias.
         using pointer = iunordered_map::pointer; //!< (Key, Value) pair pointer alias.
-        using const_pointer = iunordered_map::const_pointer; //!< (Key, Value) pair const pointer alias.
         using iterator_category = bidirectional_iterator_tag; //!< Iterator category alias.
+
+        /**
+         * @brief Default constructor.
+         */
+        iterator() = default;
 
         /**
          * @brief Increments the position.
@@ -90,6 +93,17 @@ public:
         }
 
         /**
+         * @brief Increments the position.
+         * @return The iterator before being incremented.
+         */
+        iterator operator++(int)
+        {
+            iterator copy(*this);
+            ++this;
+            return copy;
+        }
+
+        /**
          * @brief Decrements the position.
          * @return Reference to this.
          */
@@ -110,33 +124,28 @@ public:
         }
 
         /**
-         * @brief Returns a const reference to the pointed (Key, Value) pair.
+         * @brief Decrements the position.
+         * @return The iterator before being decremented.
          */
-        [[nodiscard]] const_reference operator*() const
+        iterator operator--(int)
         {
-            return _map->_storage[_index];
+            iterator copy(*this);
+            --this;
+            return copy;
         }
 
         /**
          * @brief Returns a reference to the pointed (Key, Value) pair.
          */
-        [[nodiscard]] reference operator*()
+        [[nodiscard]] reference operator*() const
         {
             return _map->_storage[_index];
         }
 
         /**
-         * @brief Returns a const pointer to the pointed (Key, Value) pair.
-         */
-        const_pointer operator->() const
-        {
-            return _map->_storage + _index;
-        }
-
-        /**
          * @brief Returns a pointer to the pointed (Key, Value) pair.
          */
-        pointer operator->()
+        pointer operator->() const
         {
             return _map->_storage + _index;
         }
@@ -149,7 +158,7 @@ public:
          */
         [[nodiscard]] friend bool operator==(const iterator& a, const iterator& b)
         {
-            return  a._index == b._index;
+            return a._index == b._index;
         }
 
         /**
@@ -160,14 +169,14 @@ public:
          */
         [[nodiscard]] friend bool operator!=(const iterator& a, const iterator& b)
         {
-            return ! (a == b);
+            return a._index != b._index;
         }
 
     private:
         friend class iunordered_map;
 
-        size_type _index;
-        iunordered_map* _map;
+        size_type _index = 0;
+        iunordered_map* _map = nullptr;
 
         iterator(size_type index, iunordered_map& map) :
             _index(index),
@@ -193,14 +202,17 @@ public:
         using hash_type = iunordered_map::hash_type; //!< Hash type alias.
         using hasher = iunordered_map::hasher; //!< Hash functor alias.
         using key_equal = iunordered_map::key_equal; //!< Equality functor alias.
-        using reference = iunordered_map::reference; //!< (Key, Value) pair reference alias.
-        using const_reference = iunordered_map::const_reference; //!< (Key, Value) pair const reference alias.
-        using pointer = iunordered_map::pointer; //!< (Key, Value) pair pointer alias.
-        using const_pointer = iunordered_map::const_pointer; //!< (Key, Value) pair const pointer alias.
+        using reference = iunordered_map::const_reference; //!< (Key, Value) pair reference alias.
+        using pointer = iunordered_map::const_pointer; //!< (Key, Value) pair pointer alias.
         using iterator_category = bidirectional_iterator_tag; //!< Iterator category alias.
 
         /**
-         * @brief Public constructor.
+         * @brief Default constructor.
+         */
+        const_iterator() = default;
+
+        /**
+         * @brief Constructor.
          * @param it Non const iterator.
          */
         const_iterator(const iterator& it) :
@@ -235,6 +247,17 @@ public:
         }
 
         /**
+         * @brief Increments the position.
+         * @return The iterator before being incremented.
+         */
+        const_iterator operator++(int)
+        {
+            const_iterator copy(*this);
+            ++this;
+            return copy;
+        }
+
+        /**
          * @brief Decrements the position.
          * @return Reference to this.
          */
@@ -252,6 +275,17 @@ public:
 
             _index = index;
             return *this;
+        }
+
+        /**
+         * @brief Decrements the position.
+         * @return The iterator before being decremented.
+         */
+        const_iterator operator--(int)
+        {
+            const_iterator copy(*this);
+            --this;
+            return copy;
         }
 
         /**
@@ -278,7 +312,7 @@ public:
          */
         [[nodiscard]] friend bool operator==(const const_iterator& a, const const_iterator& b)
         {
-            return  a._index == b._index;
+            return a._index == b._index;
         }
 
         /**
@@ -289,15 +323,15 @@ public:
          */
         [[nodiscard]] friend bool operator!=(const const_iterator& a, const const_iterator& b)
         {
-            return ! (a == b);
+            return a._index != b._index;
         }
 
     private:
         friend class iunordered_map;
         friend class iterator;
 
-        size_type _index;
-        const iunordered_map* _map;
+        size_type _index = 0;
+        const iunordered_map* _map = nullptr;
 
         const_iterator(size_type index, const iunordered_map& map) :
             _index(index),
@@ -1365,17 +1399,6 @@ public:
         }
 
         return true;
-    }
-
-    /**
-     * @brief Not equal operator.
-     * @param a First iunordered_map to compare.
-     * @param b Second iunordered_map to compare.
-     * @return `true` if the first iunordered_map is not equal to the second one, otherwise `false`.
-     */
-    [[nodiscard]] bool friend operator!=(const iunordered_map& a, const iunordered_map& b)
-    {
-        return ! (a == b);
     }
 
     /**

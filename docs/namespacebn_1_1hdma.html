@@ -70,8 +70,7 @@
             </dt>
             <dd>Indicates if HDMA is active or not.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a638d0cedbafe3ca7f5210061cd73aa80" class="m-doc">start</a>(</span><span class="m-doc-wrap">const uint16_t&amp; source_ref,
-              int elements,
+              <span class="m-doc-wrap-bumper">void <a href="#a1aca5fcdb0e61bbce351c908851f7bb4" class="m-doc">start</a>(</span><span class="m-doc-wrap">const <a href="classbn_1_1span.html" class="m-doc">bn::<wbr />span</a>&lt;const uint16_t&gt;&amp; source_ref,
               uint16_t&amp; destination_ref)</span>
             </dt>
             <dd>Start copying each frame the given amount of elements from the memory location referenced by source_ref to the memory location referenced by destination_ref.</dd>
@@ -84,8 +83,7 @@
             </dt>
             <dd>Indicates if high priority HDMA is active or not.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#af21b0e303b1ff0da00da161e87f774b8" class="m-doc">high_priority_start</a>(</span><span class="m-doc-wrap">const uint16_t&amp; source_ref,
-              int elements,
+              <span class="m-doc-wrap-bumper">void <a href="#ae75aaa5c4ee26a0a18ca2261b3d98bd9" class="m-doc">high_priority_start</a>(</span><span class="m-doc-wrap">const <a href="classbn_1_1span.html" class="m-doc">bn::<wbr />span</a>&lt;const uint16_t&gt;&amp; source_ref,
               uint16_t&amp; destination_ref)</span>
             </dt>
             <dd>Start copying each frame with high priority the given amount of elements from the memory location referenced by source_ref to the memory location referenced by destination_ref.</dd>
@@ -97,10 +95,9 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a638d0cedbafe3ca7f5210061cd73aa80"><div>
+          <section class="m-doc-details" id="a1aca5fcdb0e61bbce351c908851f7bb4"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void bn::<wbr />hdma::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a638d0cedbafe3ca7f5210061cd73aa80" class="m-doc-self">start</a>(</span><span class="m-doc-wrap">const uint16_t&amp; source_ref,
-              int elements,
+              <span class="m-doc-wrap-bumper">void bn::<wbr />hdma::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1aca5fcdb0e61bbce351c908851f7bb4" class="m-doc-self">start</a>(</span><span class="m-doc-wrap">const <a href="classbn_1_1span.html" class="m-doc">bn::<wbr />span</a>&lt;const uint16_t&gt;&amp; source_ref,
               uint16_t&amp; destination_ref)</span></span>
             </h3>
             <p>Start copying each frame the given amount of elements from the memory location referenced by source_ref to the memory location referenced by destination_ref.</p>
@@ -111,11 +108,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">source_ref</td>
-                  <td>Const reference to the memory location to copy from.</td>
-                </tr>
-                <tr>
-                  <td>elements</td>
-                  <td>Number of elements to copy (not bytes).</td>
+                  <td>Const reference to the memory location to copy from. It must refer to a multiple of <a href="namespacebn_1_1display.html#aae0fa31daf76adf1ce66583433965159" class="m-doc">bn::<wbr />display::<wbr />height()</a> values.</td>
                 </tr>
                 <tr>
                   <td>destination_ref</td>
@@ -132,10 +125,9 @@
             <p>Indicates if high priority HDMA is active or not.</p>
 <p>High priority HDMA can cause issues with audio, so avoid it unless necessary.</p>
           </div></section>
-          <section class="m-doc-details" id="af21b0e303b1ff0da00da161e87f774b8"><div>
+          <section class="m-doc-details" id="ae75aaa5c4ee26a0a18ca2261b3d98bd9"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void bn::<wbr />hdma::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af21b0e303b1ff0da00da161e87f774b8" class="m-doc-self">high_priority_start</a>(</span><span class="m-doc-wrap">const uint16_t&amp; source_ref,
-              int elements,
+              <span class="m-doc-wrap-bumper">void bn::<wbr />hdma::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae75aaa5c4ee26a0a18ca2261b3d98bd9" class="m-doc-self">high_priority_start</a>(</span><span class="m-doc-wrap">const <a href="classbn_1_1span.html" class="m-doc">bn::<wbr />span</a>&lt;const uint16_t&gt;&amp; source_ref,
               uint16_t&amp; destination_ref)</span></span>
             </h3>
             <p>Start copying each frame with high priority the given amount of elements from the memory location referenced by source_ref to the memory location referenced by destination_ref.</p>
@@ -146,11 +138,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">source_ref</td>
-                  <td>Const reference to the memory location to copy from.</td>
-                </tr>
-                <tr>
-                  <td>elements</td>
-                  <td>Number of elements to copy (not bytes).</td>
+                  <td>Const reference to the memory location to copy from. It must refer to a multiple of <a href="namespacebn_1_1display.html#aae0fa31daf76adf1ce66583433965159" class="m-doc">bn::<wbr />display::<wbr />height()</a> values.</td>
                 </tr>
                 <tr>
                   <td>destination_ref</td>
@@ -212,7 +200,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Butano Docs. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.20 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Butano Docs. Created with <a href="https://doxygen.org/">Doxygen</a> 1.12.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

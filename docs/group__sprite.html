@@ -204,6 +204,22 @@
             </dt>
             <dd>Changes the position of a <a href="classbn_1_1sprite__ptr.html" class="m-doc">sprite_<wbr />ptr</a> when the action is updated a given number of times.</dd>
             <dt>
+              class <a href="classbn_1_1sprite__top__left__position__manager.html" class="m-doc">bn::sprite_top_left_position_manager</a>
+            </dt>
+            <dd>Manages the top-left position of a <a href="classbn_1_1sprite__ptr.html" class="m-doc">sprite_<wbr />ptr</a>.</dd>
+            <dt>
+              class <a href="classbn_1_1sprite__top__left__move__to__action.html" class="m-doc">bn::sprite_top_left_move_to_action</a>
+            </dt>
+            <dd>Modifies the top-left position of a <a href="classbn_1_1sprite__ptr.html" class="m-doc">sprite_<wbr />ptr</a> until it has a given state.</dd>
+            <dt>
+              class <a href="classbn_1_1sprite__top__left__move__loop__action.html" class="m-doc">bn::sprite_top_left_move_loop_action</a>
+            </dt>
+            <dd>Modifies the top-left position of a <a href="classbn_1_1sprite__ptr.html" class="m-doc">sprite_<wbr />ptr</a> from a minimum to a maximum. When the top-left position is equal to the given final state, it goes back to its initial state and vice versa.</dd>
+            <dt>
+              class <a href="classbn_1_1sprite__top__left__move__toggle__action.html" class="m-doc">bn::sprite_top_left_move_toggle_action</a>
+            </dt>
+            <dd>Changes the top-left position of a <a href="classbn_1_1sprite__ptr.html" class="m-doc">sprite_<wbr />ptr</a> when the action is updated a given number of times.</dd>
+            <dt>
               class <a href="classbn_1_1sprite__rotation__manager.html" class="m-doc">bn::sprite_rotation_manager</a>
             </dt>
             <dd>Manages the rotation angle of a <a href="classbn_1_1sprite__ptr.html" class="m-doc">sprite_<wbr />ptr</a>.</dd>
@@ -989,6 +1005,10 @@
             </dt>
             <dd></dd>
             <dt>
+              <span class="m-doc-wrap-bumper">#define <a href="#ga0fb63c370d281c0570b6a19ee838c380" class="m-doc">BN_CFG_SPRITE_TILES_SANITY_CHECK_ENABLED</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
               <span class="m-doc-wrap-bumper">#define <a href="#gad9ac6fa1ea291dd3dcc71212b682b737" class="m-doc">BN_CFG_SPRITES_MAX_ITEMS</a></span>
             </dt>
             <dd></dd>
@@ -1400,6 +1420,13 @@
             </h3>
 <p>Specifies if the sprite tiles manager must be logged in detail or not.</p><p>Keep in mind that it is very slow, it is useful only for debugging.</p>
           </div></section>
+          <section class="m-doc-details" id="ga0fb63c370d281c0570b6a19ee838c380"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a href="#ga0fb63c370d281c0570b6a19ee838c380" class="m-doc-self">BN_CFG_SPRITE_TILES_SANITY_CHECK_ENABLED</a></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="bn__config__sprite__tiles_8h.html">&lt;bn_config_sprite_tiles.h&gt;</a></div>
+            </h3>
+<p>Specifies if the sprite tiles manager sanity check is enabled or not.</p><p>Sanity check asserts if the internal state of the manager is valid.</p>
+          </div></section>
           <section class="m-doc-details" id="gad9ac6fa1ea291dd3dcc71212b682b737"><div>
             <h3>
               <span class="m-doc-wrap-bumper">#define <a href="#gad9ac6fa1ea291dd3dcc71212b682b737" class="m-doc-self">BN_CFG_SPRITES_MAX_ITEMS</a></span>
@@ -1459,7 +1486,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Butano Docs. Created with <a href="https://doxygen.org/">Doxygen</a> 1.8.20 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Butano Docs. Created with <a href="https://doxygen.org/">Doxygen</a> 1.12.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

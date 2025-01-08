@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Gustavo Valiente gustavo.valiente@protonmail.com
+ * Copyright (c) 2020-2025 Gustavo Valiente gustavo.valiente@protonmail.com
  * zlib License, see LICENSE file.
  */
 
@@ -259,7 +259,7 @@ public:
             if(other.has_value())
             {
                 base_manager* manager = _manager_ptr();
-                BN_ASSERT(manager->type() == other._manager_ptr()->type(), "Value type mismatch");
+                BN_BASIC_ASSERT(manager->type() == other._manager_ptr()->type(), "Different value type");
 
                 manager->swap(*this, other);
             }

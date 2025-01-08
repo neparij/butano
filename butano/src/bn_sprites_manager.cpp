@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Gustavo Valiente gustavo.valiente@protonmail.com
+ * Copyright (c) 2020-2025 Gustavo Valiente gustavo.valiente@protonmail.com
  * zlib License, see LICENSE file.
  */
 
@@ -500,7 +500,7 @@ void set_palette(id_type id, [[maybe_unused]] bpp_mode old_bpp, const sprite_pal
     if(palette != item->palette)
     {
         BN_BASIC_ASSERT(old_bpp == palette.bpp(),
-                        "Palette BPP mode mismatch: ", int(old_bpp), " - ", int(palette.bpp()));
+                        "Different palette BPP mode: ", int(old_bpp), " - ", int(palette.bpp()));
 
         hw::sprites::set_palette(palette.id(), item->handle);
         item->palette = palette;
@@ -515,7 +515,7 @@ void set_palette(id_type id, [[maybe_unused]] bpp_mode old_bpp, sprite_palette_p
     if(palette != item->palette)
     {
         BN_BASIC_ASSERT(old_bpp == palette.bpp(),
-                        "Palette BPP mode mismatch: ", int(old_bpp), " - ", int(palette.bpp()));
+                        "Different palette BPP mode: ", int(old_bpp), " - ", int(palette.bpp()));
 
         hw::sprites::set_palette(palette.id(), item->handle);
         item->palette = move(palette);
@@ -1083,8 +1083,8 @@ sprite_third_attributes third_attributes(id_type id)
 
 void set_third_attributes(id_type id, const sprite_third_attributes& third_attributes)
 {
-    set_tiles_and_palette(id, shape_size(id), bn::sprite_tiles_ptr(third_attributes.tiles()),
-                          bn::sprite_palette_ptr(third_attributes.palette()));
+    set_tiles_and_palette(id, shape_size(id), sprite_tiles_ptr(third_attributes.tiles()),
+                          sprite_palette_ptr(third_attributes.palette()));
     set_bg_priority(id, third_attributes.bg_priority());
 }
 
