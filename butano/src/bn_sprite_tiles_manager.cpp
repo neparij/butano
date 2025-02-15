@@ -252,12 +252,21 @@ namespace
     };
 
 
+    struct hasher
+    {
+        [[nodiscard]] constexpr unsigned operator()(const tile* tile) const
+        {
+            return unsigned(tile) / 4;
+        }
+    };
+
+
     class static_data
     {
 
     public:
         items_list items;
-        unordered_map<const tile*, int, max_items * 2> items_map;
+        unordered_map<const tile*, int, max_items * 2, hasher> items_map;
         vector<uint16_t, max_items> free_items;
         vector<uint16_t, max_items> to_remove_items;
         vector<uint16_t, max_items> to_commit_uncompressed_items;
@@ -489,8 +498,16 @@ namespace
 
             vector<uint16_t, max_items>& to_commit_items =
                     item.compression() == compression_type::NONE ?
-                        data.to_commit_uncompressed_items : data.to_commit_compressed_items;
-            to_commit_items.erase(bn::find(to_commit_items.begin(), to_commit_items.end(), id));
+                            data.to_commit_uncompressed_items : data.to_commit_compressed_items;
+
+            for(auto it = to_commit_items.begin(), end = to_commit_items.end(); it != end; ++it)
+            {
+                if(id == *it)
+                {
+                    to_commit_items.erase(it);
+                    return;
+                }
+            }
         }
     }
 
@@ -680,7 +697,7 @@ namespace
 
                     int new_free_item_id = _create_item(id, tiles_data, compression, tiles_count, true);
 
-                    if(new_free_item_id >= 0)
+                    if(new_free_item_id >= 0) [[likely]]
                     {
                         _insert_free_item(new_free_item_id);
                     }
@@ -701,7 +718,7 @@ namespace
                 int id = *free_items_it;
                 int new_free_item_id = _create_item(id, tiles_data, compression, tiles_count, data.delay_commit);
 
-                if(new_free_item_id >= 0)
+                if(new_free_item_id >= 0) [[likely]]
                 {
                     _insert_free_item(new_free_item_id, free_items_it);
                     ++free_items_it;
@@ -740,7 +757,7 @@ namespace
                 int id = *free_items_it;
                 int new_free_item_id = _create_item(id, nullptr, compression_type::NONE, tiles_count, false);
 
-                if(new_free_item_id >= 0)
+                if(new_free_item_id >= 0) [[likely]]
                 {
                     _insert_free_item(new_free_item_id, free_items_it);
                     ++free_items_it;
@@ -757,7 +774,7 @@ namespace
 
 void init()
 {
-    new(&data) static_data();
+    ::new(static_cast<void*>(&data)) static_data();
 
     BN_SPRITE_TILES_LOG("sprite_tiles_manager - INIT");
 
@@ -972,7 +989,7 @@ void decrease_usages(int id)
 
     --item.usages;
 
-    if(! item.usages)
+    if(! item.usages) [[unlikely]]
     {
         item.set_status(status_type::TO_REMOVE);
         item.commit_if_recovered = item.commit;
@@ -1094,10 +1111,13 @@ void update()
 {
     if(data.to_remove_tiles_count)
     {
+        data.to_remove_tiles_count = 0;
+
         BN_SPRITE_TILES_LOG("sprite_tiles_manager - UPDATE");
 
         auto begin = data.items.begin();
         auto end = data.items.end();
+        int free_tiles_count = data.free_tiles_count;
 
         for(int to_remove_item_index : data.to_remove_items)
         {
@@ -1112,7 +1132,7 @@ void update()
 
             item.set_status(status_type::FREE);
             item.commit_if_recovered = false;
-            data.free_tiles_count += item.tiles_count;
+            free_tiles_count += item.tiles_count;
 
             auto next_iterator = iterator;
             ++next_iterator;
@@ -1150,8 +1170,8 @@ void update()
             _insert_free_item(to_remove_item_index);
         }
 
+        data.free_tiles_count = free_tiles_count;
         data.to_remove_items.clear();
-        data.to_remove_tiles_count = 0;
 
         BN_SPRITE_TILES_LOG_STATUS();
     }

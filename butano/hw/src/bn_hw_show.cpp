@@ -54,44 +54,48 @@ namespace
                const string_view& function, int line, const string_view& message, const string_view& tag)
     {
         string<BN_CFG_ASSERT_BUFFER_SIZE> buffer;
+        bool show_general_info = line >= 0;
         init_tte(system_font);
 
-        // Show file name:
-        tte_set_ink(light_red.data());
-        tte_write("ERROR in ");
-
-        if(file_name.empty())
+        if(show_general_info)
         {
-            tte_write("unknown file name");
-        }
-        else
-        {
-            buffer.append(file_name.data(), file_name.size());
-            tte_write(buffer.c_str());
-        }
+            // Show file name:
+            tte_set_ink(light_red.data());
+            tte_write("ERROR in ");
 
-        tte_write("\n");
+            if(file_name.empty())
+            {
+                tte_write("unknown file name");
+            }
+            else
+            {
+                buffer.append(file_name.data(), file_name.size());
+                tte_write(buffer.c_str());
+            }
 
-        // Show function and line:
-        tte_set_ink(light_blue.data());
+            tte_write("\n");
 
-        if(function.empty())
-        {
-            tte_write("Line: ");
-        }
-        else
-        {
+            // Show function and line:
+            tte_set_ink(light_blue.data());
+
+            if(function.empty())
+            {
+                tte_write("Line: ");
+            }
+            else
+            {
+                buffer.clear();
+                buffer.append(function.data(), function.size());
+                tte_write(buffer.c_str());
+                tte_write("::");
+            }
+
+            ostringstream buffer_stream(buffer);
             buffer.clear();
-            buffer.append(function.data(), function.size());
+            buffer_stream << line;
             tte_write(buffer.c_str());
-            tte_write("::");
+            tte_write("\n\n");
         }
-
-        ostringstream buffer_stream(buffer);
-        buffer.clear();
-        buffer_stream << line;
-        tte_write(buffer.c_str());
-        tte_write("\n\n");
 
         // Show condition:
         if(! condition.empty())
@@ -109,27 +113,30 @@ namespace
         tte_set_ink(colors::white.data());
         tte_write(buffer.c_str());
 
-        // Show stacktrace warning:
-        #ifdef BN_STACKTRACE
-            #if BN_CFG_LOG_ENABLED
-                const char* stacktrace_warning = "Stack trace logged";
-                POINT16 stacktrace_warning_size = tte_get_text_size(stacktrace_warning);
-                tte_set_pos(tte_margin, display::height() - tte_margin - stacktrace_warning_size.y);
-                tte_set_ink(colors::purple.data());
-                tte_write(stacktrace_warning);
-            #endif
-        #endif
-
-        // Show tag:
-        if(! tag.empty())
+        if(show_general_info)
         {
-            buffer.clear();
-            buffer.append(tag.data(), tag.size());
+            // Show stacktrace warning:
+            #ifdef BN_STACKTRACE
+                #if BN_CFG_LOG_ENABLED
+                    const char* stacktrace_warning = "Stack trace logged";
+                    POINT16 stacktrace_warning_size = tte_get_text_size(stacktrace_warning);
+                    tte_set_pos(tte_margin, display::height() - tte_margin - stacktrace_warning_size.y);
+                    tte_set_ink(colors::purple.data());
+                    tte_write(stacktrace_warning);
+                #endif
+            #endif
 
-            POINT16 tag_size = tte_get_text_size(buffer.c_str());
-            tte_set_pos(display::width() - tte_margin - tag_size.x, display::height() - tte_margin - tag_size.y);
-            tte_set_ink(colors::orange.data());
-            tte_write(buffer.c_str());
+            // Show tag:
+            if(! tag.empty())
+            {
+                buffer.clear();
+                buffer.append(tag.data(), tag.size());
+
+                POINT16 tag_size = tte_get_text_size(buffer.c_str());
+                tte_set_pos(display::width() - tte_margin - tag_size.x, display::height() - tte_margin - tag_size.y);
+                tte_set_ink(colors::orange.data());
+                tte_write(buffer.c_str());
+            }
         }
     }
 #endif
@@ -237,17 +244,20 @@ namespace
                 int64_t global_var;
                 tte_set_pos(init_x, init_y);
                 tte_set_ink(colors::green.data());
+                buffer.clear();
 
                 if(show_total)
                 {
-                    tte_write("PROFILER results - TOTAL ticks");
+                    buffer_stream << "PROFILER - Total ticks: " << total_ticks;
                     global_var = total_ticks;
                 }
                 else
                 {
-                    tte_write("PROFILER results - MAX ticks");
+                    buffer_stream << "PROFILER - Max ticks: " << max_ticks;
                     global_var = max_ticks;
                 }
+
+                tte_write(buffer.c_str());
 
                 if(num_entries > max_visible_entries)
                 {
