@@ -72,7 +72,7 @@ namespace bn::core
      *
      * Instead of reading the keypad of the GBA, these keypad commands are replayed.
      */
-    void init(const optional<color>& transparent_color, const string_view& keypad_commands, void (*onVBlank)());
+    void init(const optional<color>& transparent_color, const string_view& keypad_commands, void (*onVBlank)(), void (*onTimer1)());
 
     /**
      * @brief Returns the number of frames to skip.

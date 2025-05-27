@@ -319,30 +319,30 @@ void default_vblank_handler();
 
 void init()
 {
-    init(nullopt, string_view(), default_vblank_handler);
+    init(nullopt, string_view(), default_vblank_handler, nullptr);
 }
 
 void init(const optional<color>& transparent_color)
 {
-    init(transparent_color, string_view(), default_vblank_handler);
+    init(transparent_color, string_view(), default_vblank_handler, nullptr);
 }
 
 void init(const string_view& keypad_commands)
 {
-    init(nullopt, keypad_commands, default_vblank_handler);
+    init(nullopt, keypad_commands, default_vblank_handler, nullptr);
 }
 
-void init(void (*onVBlank)())
+void init(void (*onVBlank)(), void (*onTimer1)())
 {
-    init(nullopt, string_view(), onVBlank);
+    init(nullopt, string_view(), onVBlank, onTimer1);
 }
 
-void init(const optional<color>& transparent_color, const string_view& keypad_commands, void (*onVBlank)())
+void init(const optional<color>& transparent_color, const string_view& keypad_commands, void (*onVBlank)(), void (*onTimer1)())
 {
     ::new(static_cast<void*>(&data)) static_data();
 
     // Initial wait:
-    hw::core::init();
+    // hw::core::init();
 
     // Init H-Blank effects system:
     hblank_effects_manager::init();
@@ -350,12 +350,14 @@ void init(const optional<color>& transparent_color, const string_view& keypad_co
     // Init irq system:
     hw::irq::init();
     hw::irq::set_isr(hw::irq::id::HBLANK, hw::hblank_effects::_intr);
+    bn::hw::irq::set_isr(bn::hw::irq::id::TIMER1, onTimer1);
+    bn::hw::irq::enable(bn::hw::irq::id::TIMER1);
 
     // Init hdma system:
     hdma_manager::init();
 
     // Init link system:
-    link_manager::init();
+    // link_manager::init();
 
     // Init audio system:
     //audio_manager::init();
@@ -387,7 +389,7 @@ void init(const optional<color>& transparent_color, const string_view& keypad_co
     hw::irq::enable(hw::irq::id::VBLANK);
 
     // First update:
-    update();
+    // update();
 
     // Keypad polling fix:
     keypad_manager::update();
