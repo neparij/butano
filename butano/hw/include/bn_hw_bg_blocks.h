@@ -19,6 +19,9 @@ extern "C"
 
     BN_CODE_IWRAM void bn_hw_bg_blocks_commit_blocks(
             const unsigned* source_data_ptr, unsigned blocks, unsigned word_offset, unsigned* destination_vram_ptr);
+
+    BN_CODE_IWRAM void bn_hw_bg_blocks_commit_half_words_preserve_zeroes(
+            const uint16_t* source_data_ptr, unsigned half_words, uint16_t offset, uint16_t* destination_vram_ptr);
 }
 
 namespace bn::hw::bg_blocks

@@ -116,15 +116,32 @@ int palettes_bank::find_bpp_4(const span<const color>& colors, uint16_t hash)
     return -1;
 }
 
-int palettes_bank::find_bpp_8(const span<const color>& colors)
+int palettes_bank::find_bpp_8(const span<const color>& colors, uint16_t hash)
 {
-    int bpp_8_slots_count = _bpp_8_slots_count();
-    int slots_count = colors.size() / hw::palettes::colors_per_palette();
+    auto bpp_8_indexes_map_it = _bpp_8_indexes_map.find(hash);
 
-    if(bpp_8_slots_count >= slots_count)
+    if(bpp_8_indexes_map_it != _bpp_8_indexes_map.end())
     {
-        ++_palettes[0].usages;
-        return 0;
+        int index = bpp_8_indexes_map_it->second;
+
+        if(_same_colors(colors, index))
+        {
+            palette& pal = _palettes[index];
+            ++pal.usages;
+            return index;
+        }
+    }
+
+    for(int index = 0, limit = _first_bpp_4_palette_index(); index < limit; index++)
+    {
+        palette& pal = _palettes[index];
+
+        // Active palettes hash > 0:
+        if(hash == pal.hash && _same_colors(colors, index))
+        {
+            ++pal.usages;
+            return index;
+        }
     }
 
     return -1;
@@ -185,75 +202,66 @@ int palettes_bank::create_bpp_4(const span<const color>& colors, uint16_t hash, 
     return -1;
 }
 
-int palettes_bank::create_bpp_8(const span<const color>& colors, compression_type compression, bool required)
+int palettes_bank::create_bpp_8(const span<const color>& colors, uint16_t hash, compression_type compression, bool required)
 {
-    palette& first_pal = _palettes[0];
     int colors_count = colors.size();
     int required_slots_count = colors_count / hw::palettes::colors_per_palette();
-    int bpp_8_slots_count = _bpp_8_slots_count();
+    int free_slots_count = _first_bpp_4_palette_index();
 
-    if(! first_pal.usages || first_pal.bpp_8)
-    {
-        if(bpp_8_slots_count >= required_slots_count)
-        {
-            ++first_pal.usages;
-            return 0;
-        }
+    for(int index = 0, limit = _first_bpp_4_palette_index(); index < limit; index++) {
+        palette& pal = _palettes[index];
 
-        if(required_slots_count <= _first_bpp_4_palette_index())
-        {
-            if(first_pal.usages)
-            {
-                ++first_pal.usages;
+        if(pal.usages || pal.locked) {
+            free_slots_count--;
+        } else {
+            if (required_slots_count <= free_slots_count) {
+                pal.usages = 1;
+                pal.hash = hash;
+                pal.bpp_8 = true;
+                pal.slots_count = int8_t(required_slots_count);
+                pal.rotate_range_size = int8_t(colors_count - 1);
+
+                for(int slot = 0; slot < required_slots_count; ++slot)
+                {
+                    _palettes[index + slot].locked = true;
+                }
+
+                alignas(int) color dest_colors_array[hw::palettes::colors()];
+                span<const color> dest_colors_span;
+
+                switch(compression)
+                {
+
+                    case compression_type::NONE:
+                        BN_ASSERT(aligned<4>(colors.data()), "Colors are not aligned");
+
+                        dest_colors_span = colors;
+                        break;
+
+                    case compression_type::LZ77:
+                        hw::decompress::lz77(colors.data(), dest_colors_array);
+                        dest_colors_span = span<const color>(dest_colors_array, colors_count);
+                        break;
+
+                    case compression_type::RUN_LENGTH:
+                        hw::decompress::rl_wram(colors.data(), dest_colors_array);
+                        dest_colors_span = span<const color>(dest_colors_array, colors_count);
+                        break;
+
+                    case compression_type::HUFFMAN:
+                        hw::decompress::huff(colors.data(), dest_colors_array);
+                        dest_colors_span = span<const color>(dest_colors_array, colors_count);
+                        break;
+
+                    default:
+                        BN_ERROR("Unknown compression type: ", int(compression));
+                        break;
+                }
+
+                _set_colors_bpp_impl(index, dest_colors_span);
+                _bpp_8_indexes_map.insert_or_assign(hash, int16_t(index));
+                return index;
             }
-            else
-            {
-                first_pal.usages = 1;
-                first_pal.bpp_8 = true;
-            }
-
-            first_pal.slots_count = int8_t(required_slots_count);
-            first_pal.rotate_range_size = int8_t(colors_count - 1);
-
-            for(int slot = 0; slot < required_slots_count; ++slot)
-            {
-                _palettes[slot].locked = true;
-            }
-
-            alignas(int) color dest_colors_array[hw::palettes::colors()];
-            span<const color> dest_colors_span;
-
-            switch(compression)
-            {
-
-            case compression_type::NONE:
-                BN_ASSERT(aligned<4>(colors.data()), "Colors are not aligned");
-
-                dest_colors_span = colors;
-                break;
-
-            case compression_type::LZ77:
-                hw::decompress::lz77(colors.data(), dest_colors_array);
-                dest_colors_span = span<const color>(dest_colors_array, colors_count);
-                break;
-
-            case compression_type::RUN_LENGTH:
-                hw::decompress::rl_wram(colors.data(), dest_colors_array);
-                dest_colors_span = span<const color>(dest_colors_array, colors_count);
-                break;
-
-            case compression_type::HUFFMAN:
-                hw::decompress::huff(colors.data(), dest_colors_array);
-                dest_colors_span = span<const color>(dest_colors_array, colors_count);
-                break;
-
-            default:
-                BN_ERROR("Unknown compression type: ", int(compression));
-                break;
-            }
-
-            _set_colors_bpp_impl(0, dest_colors_span);
-            return 0;
         }
     }
 
@@ -325,17 +333,20 @@ void palettes_bank::set_colors(int id, const span<const color>& colors)
     {
         BN_ASSERT(aligned<4>(colors.data()), "Colors are not aligned");
     }
-    else
-    {
-        uint16_t old_hash = pal.hash;
-        uint16_t new_hash = colors_hash(colors);
 
-        if(old_hash != new_hash)
-        {
+    uint16_t old_hash = pal.hash;
+    uint16_t new_hash = colors_hash(colors);
+
+    if(old_hash != new_hash)
+    {
+        if(pal.bpp_8) {
+            _erase_bpp_8_indexes_map_index(old_hash);
+            _bpp_8_indexes_map.insert_or_assign(new_hash, int16_t(id));
+        } else {
             _erase_bpp_4_indexes_map_index(old_hash);
             _bpp_4_indexes_map.insert_or_assign(new_hash, int16_t(id));
-            pal.hash = new_hash;
         }
+        pal.hash = new_hash;
     }
 
     _set_colors_bpp_impl(id, colors);
@@ -357,15 +368,20 @@ void palettes_bank::set_color(int id, int color_index, color color)
         pal.update = true;
         _update = true;
 
-        if(! pal.bpp_8 && color_index < hash_colors)
+        if(color_index < hash_colors)
         {
             uint16_t old_hash = pal.hash;
             uint16_t new_hash = colors_hash(span<const bn::color>(colors_data, colors_count));
 
             if(old_hash != new_hash)
             {
-                _erase_bpp_4_indexes_map_index(old_hash);
-                _bpp_4_indexes_map.insert_or_assign(new_hash, int16_t(id));
+                if(pal.bpp_8) {
+                    _erase_bpp_8_indexes_map_index(old_hash);
+                    _bpp_8_indexes_map.insert_or_assign(new_hash, int16_t(id));
+                } else {
+                    _erase_bpp_4_indexes_map_index(old_hash);
+                    _bpp_4_indexes_map.insert_or_assign(new_hash, int16_t(id));
+                }
                 pal.hash = new_hash;
             }
         }
@@ -771,14 +787,21 @@ void palettes_bank::fill_hblank_effect_colors(const color* source_colors_ptr, ui
 
 int palettes_bank::_bpp_8_slots_count() const
 {
-    const palette& first_pal = _palettes[0];
+    int used_slots_count = 0;
+    for (int index = 0; index < hw::palettes::count(); index++) {
+        const palette& pal = _palettes[index];
 
-    if(first_pal.usages && first_pal.bpp_8)
-    {
-        return first_pal.slots_count;
+        if (!pal.bpp_8) {
+            break;
+        }
+        if(pal.usages || pal.locked)
+        {
+            used_slots_count += pal.slots_count;
+        }
     }
 
-    return 0;
+    BN_LOG("_bpp_8_slots_count: ", used_slots_count);
+    return used_slots_count;
 }
 
 int palettes_bank::_first_bpp_4_palette_index() const

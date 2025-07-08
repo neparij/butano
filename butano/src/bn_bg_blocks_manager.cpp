@@ -24,6 +24,7 @@
 #include "bn_affine_bg_map_item.cpp.h"
 #include "bn_affine_bg_tiles_ptr.cpp.h"
 #include "bn_affine_bg_tiles_item.cpp.h"
+#include "bn_bg_palette_color_hbe_handler.h"
 
 #if BN_CFG_BG_BLOCKS_LOG_ENABLED
     #include "bn_log.h"
@@ -198,6 +199,7 @@ namespace
     private:
         uint8_t _status: 2 = uint8_t(status_type::FREE);
         uint8_t _compression: 2 = uint8_t(compression_type::NONE);
+        uint8_t _bpp: 2 = uint8_t(bpp_mode::BPP_4);
         uint8_t _big_map_canvas_size: 2 = uint8_t(affine_bg_big_map_canvas_size::NORMAL);
 
     public:
@@ -224,6 +226,16 @@ namespace
         void set_compression(compression_type compression)
         {
             _compression = uint8_t(compression);
+        }
+
+        [[nodiscard]] bpp_mode bpp() const
+        {
+            return static_cast<bpp_mode>(_bpp);
+        }
+
+        void set_bpp(bpp_mode mode)
+        {
+            _bpp = uint8_t(mode);
         }
 
         [[nodiscard]] affine_bg_big_map_canvas_size big_map_canvas_size() const
@@ -924,10 +936,30 @@ namespace
             return;
         }
 
+        // // Find a map with that tiles pointer
+        // for(auto iterator = data.items.begin(), end = data.items.end(); iterator != end; ++iterator) {
+        //     item_type& item = *iterator;
+        //     if (item.regular_tiles == )
+        // }
+
         if(item.is_tiles)
         {
+            BN_LOG("Commit tiles");
             uint16_t* destination_vram_ptr = hw::bg_blocks::vram(item.start_block);
-            _hw_commit(source_data_ptr, item.compression(), item.width, use_dma, destination_vram_ptr);
+            if (item.bpp() == bpp_mode::BPP_8) {
+                uint16_t palette_offset = unsigned(item.palette.has_value() ? item.palette_offset() * hw::palettes::colors_per_palette() : 0);
+
+                if(item.compression() != compression_type::NONE)
+                {
+                    _hw_commit(source_data_ptr, item.compression(), item.width, use_dma, destination_vram_ptr);
+                    source_data_ptr = destination_vram_ptr;
+                }
+
+                bn_hw_bg_blocks_commit_half_words_preserve_zeroes(source_data_ptr, item.width, palette_offset, destination_vram_ptr);
+                // bn_hw_bg_blocks_commit_half_words_preserve_zeroes(source_data_ptr, item.width, 0x80, destination_vram_ptr);
+            } else {
+                _hw_commit(source_data_ptr, item.compression(), item.width, use_dma, destination_vram_ptr);
+            }
             return;
         }
 
@@ -962,6 +994,7 @@ namespace
         }
         else
         {
+            BN_LOG("Commit Regular BG");
             // Big maps are committed from bgs_manager:
             if(item.is_big)
             {
@@ -1094,6 +1127,7 @@ namespace
         item->data = data_ptr;
         item->blocks_count = uint8_t(blocks_count);
         item->set_compression(create_data.compression);
+        item->set_bpp(create_data.bpp);
         item->set_big_map_canvas_size(data.new_affine_big_map_canvas_info.canvas_size());
         item->regular_tiles = move(create_data.regular_tiles);
         item->affine_tiles = move(create_data.affine_tiles);
@@ -1484,6 +1518,7 @@ int find_affine_map(const affine_bg_map_item& map_item, const affine_bg_map_cell
 
 int create_regular_tiles(const regular_bg_tiles_item& tiles_item, bool optional)
 {
+    BN_LOG("Create regular tiles");
     const span<const tile>& tiles_ref = tiles_item.tiles_ref();
     auto tiles_data = reinterpret_cast<const uint16_t*>(tiles_ref.data());
     int tiles_count = tiles_ref.size();
@@ -1582,6 +1617,15 @@ int create_affine_tiles(const affine_bg_tiles_item& tiles_item, bool optional)
 int create_regular_map(const regular_bg_map_item& map_item, const regular_bg_map_cell* data_ptr,
                        regular_bg_tiles_ptr&& tiles, bg_palette_ptr&& palette, bool optional)
 {
+    BN_LOG("Create regular map");
+
+    if (palette.id() != 0 && palette.bpp() == bpp_mode::BPP_8) {
+        item_type& item = data.items.item(tiles.handle());
+        BN_LOG("Item: ", item.is_tiles);
+        item.palette = palette;
+        _commit_item(item, false);
+    }
+
     const size& dimensions = map_item.dimensions();
     compression_type compression = map_item.compression();
     bool big = map_item.big();
@@ -1986,9 +2030,11 @@ optional<span<const affine_bg_map_cell>> affine_map_cells_ref(int id)
 
 void set_regular_tiles_ref(int id, const regular_bg_tiles_item& tiles_item)
 {
+    BN_LOG("Set regular tiles ref");
     const span<const tile>& tiles_ref = tiles_item.tiles_ref();
     auto data_ptr = reinterpret_cast<const uint16_t*>(tiles_ref.data());
     compression_type compression = tiles_item.compression();
+    bpp_mode bpp = tiles_item.bpp();
     item_type& item = data.items.item(id);
 
     BN_BG_BLOCKS_LOG("bg_blocks_manager - SET REGULAR TILES REF: ", id, " - ", item.start_block, " - ",
@@ -2004,6 +2050,7 @@ void set_regular_tiles_ref(int id, const regular_bg_tiles_item& tiles_item)
 
         item.data = data_ptr;
         item.set_compression(compression);
+        item.set_bpp(bpp);
         item.commit = true;
         data.check_commit = true;
 
@@ -2012,6 +2059,7 @@ void set_regular_tiles_ref(int id, const regular_bg_tiles_item& tiles_item)
     else if(compression != item.compression())
     {
         item.set_compression(compression);
+        item.set_bpp(bpp);
         item.commit = true;
         data.check_commit = true;
 
@@ -2039,6 +2087,7 @@ void set_affine_tiles_ref(int id, const affine_bg_tiles_item& tiles_item)
 
         item.data = data_ptr;
         item.set_compression(compression);
+        item.set_bpp(bpp_mode::BPP_8);
         item.commit = true;
         data.check_commit = true;
 
@@ -2047,6 +2096,7 @@ void set_affine_tiles_ref(int id, const affine_bg_tiles_item& tiles_item)
     else if(compression != item.compression())
     {
         item.set_compression(compression);
+        item.set_bpp(bpp_mode::BPP_8);
         item.commit = true;
         data.check_commit = true;
 
@@ -2253,10 +2303,27 @@ void remove_affine_map_tiles(int id)
     item.affine_tiles.reset();
 }
 
+const bg_palette_ptr& tiles_palette(int id)
+{
+    const item_type& item = data.items.item(id);
+    return *item.palette;
+}
+
 const bg_palette_ptr& map_palette(int id)
 {
     const item_type& item = data.items.item(id);
     return *item.palette;
+}
+
+void set_regular_tiles_palette(int id, bg_palette_ptr&& palette)
+{
+    item_type& item = data.items.item(id);
+
+    if(palette != item.palette)
+    {
+        item.set_bpp(palette.bpp());
+        item.palette = move(palette);
+    }
 }
 
 void set_regular_map_palette(int id, bg_palette_ptr&& palette)
@@ -2273,7 +2340,7 @@ void set_regular_map_palette(int id, bg_palette_ptr&& palette)
         int old_tiles_offset;
         int old_palette_offset;
 
-        if(item.palette)
+        if(item.palette && item.palette.has_value() && item.palette->bpp() != bpp_mode::BPP_8)
         {
             old_palette_bpp = int(item.palette->bpp());
             old_tiles_offset = item.regular_tiles_offset();
@@ -2329,7 +2396,7 @@ void set_regular_map_tiles_and_palette(int id, regular_bg_tiles_ptr&& tiles, bg_
     int old_tiles_offset;
     int old_palette_offset;
 
-    if(item.regular_tiles && item.palette)
+    if(item.regular_tiles && item.palette && item.palette.has_value() && item.palette->bpp() != bpp_mode::BPP_8)
     {
         old_tiles_offset = item.regular_tiles_offset();
         old_palette_offset = item.palette_offset();
@@ -2443,7 +2510,7 @@ void update_regular_map_col(int id, int x, int y)
     const uint16_t* second_source_data = item_data + ((second_y * map_width) + x);
     uint16_t* dest_data = hw::bg_blocks::vram(item.start_block) + (y_separator * 32) + (x & 31);
     auto tiles_offset = unsigned(item.regular_tiles_offset());
-    auto palette_offset = unsigned(item.palette_offset());
+    auto palette_offset = (item.palette.has_value() && item.palette->bpp() != bpp_mode::BPP_8) ? unsigned(item.palette_offset()) : unsigned(0);
 
     if(tiles_offset || palette_offset)
     {
@@ -2643,7 +2710,7 @@ void update_regular_map_row(int id, int x, int y)
     const uint16_t* second_source_data = item_data + ((y * map_width) + second_x);
     uint16_t* dest_data = hw::bg_blocks::vram(item.start_block) + (((y & 31) * 32) + x_separator);
     auto tiles_offset = unsigned(item.regular_tiles_offset());
-    auto palette_offset = unsigned(item.palette_offset());
+    auto palette_offset = (item.palette.has_value() && item.palette->bpp() != bpp_mode::BPP_8) ? unsigned(item.palette_offset()) : unsigned(0);
 
     if(tiles_offset || palette_offset)
     {
@@ -2737,7 +2804,7 @@ void set_regular_map_position(int id, int x, int y)
     int elements = 32 - x_separator;
     int second_x = _fix_map_x(x + elements, map_width);
     auto tiles_offset = unsigned(item.regular_tiles_offset());
-    auto palette_offset = unsigned(item.palette_offset());
+    auto palette_offset = (item.palette.has_value() && item.palette->bpp() != bpp_mode::BPP_8) ? unsigned(item.palette_offset()) : unsigned(0);
 
     if(tiles_offset || palette_offset)
     {

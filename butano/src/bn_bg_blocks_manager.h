@@ -146,7 +146,11 @@ namespace bn::bg_blocks_manager
 
     void remove_affine_map_tiles(int id);
 
+    [[nodiscard]] const bg_palette_ptr& tiles_palette(int id);
+
     [[nodiscard]] const bg_palette_ptr& map_palette(int id);
+
+    void set_regular_tiles_palette(int id, bg_palette_ptr&& palette);
 
     void set_regular_map_palette(int id, bg_palette_ptr&& palette);
 

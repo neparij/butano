@@ -50,11 +50,11 @@ public:
 
     [[nodiscard]] int find_bpp_4(const span<const color>& colors, uint16_t hash);
 
-    [[nodiscard]] int find_bpp_8(const span<const color>& colors);
+    [[nodiscard]] int find_bpp_8(const span<const color>& colors, uint16_t hash);
 
     [[nodiscard]] int create_bpp_4(const span<const color>& colors, uint16_t hash, bool required);
 
-    [[nodiscard]] int create_bpp_8(const span<const color>& colors, compression_type compression, bool required);
+    [[nodiscard]] int create_bpp_8(const span<const color>& colors, uint16_t hash, compression_type compression, bool required);
 
     void increase_usages(int id);
 
@@ -255,6 +255,7 @@ private:
     fixed _hue_shift_intensity;
     fixed _fade_intensity;
     unordered_map<uint16_t, int16_t, hw::palettes::count() * 2, identity_hasher> _bpp_4_indexes_map;
+    unordered_map<uint16_t, int16_t, hw::palettes::count() * 2, identity_hasher> _bpp_8_indexes_map;
     int _first_index_to_commit = numeric_limits<int>::max();
     int _last_index_to_commit = 0;
     color _fade_color;
@@ -273,6 +274,11 @@ private:
     __attribute__((noinline)) void _erase_bpp_4_indexes_map_index(uint16_t hash)
     {
         _bpp_4_indexes_map.erase(hash);
+    }
+
+    __attribute__((noinline)) void _erase_bpp_8_indexes_map_index(uint16_t hash)
+    {
+        _bpp_8_indexes_map.erase(hash);
     }
 
     void _on_global_effect_updated(bool active);
