@@ -96,11 +96,6 @@ namespace bn::sprite_palettes
      * @brief Sets the color blind mode applied to all sprite color palettes.
      *
      * @param mode New color blind mode.
-     *
-     * @retval -1 No color blind mode applied.
-     * @retval 0 Deuteranopia (red-green).
-     * @retval 1 Protanopia (red-green).
-     * @retval 2 Tritanopia (blue-yellow).
      */
     void set_color_blind_mode(int mode);
 
